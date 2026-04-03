@@ -1,0 +1,27 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/api/roblox/*"
+  to = "https://apis.roblox.com/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/thumbnails/*"
+  to = "https://thumbnails.roblox.com/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/games/*"
+  to = "https://games.roblox.com/:splat"
+  status = 200
+  force = true
+
+# SPA client-side routing fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
