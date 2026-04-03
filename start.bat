@@ -1,0 +1,6 @@
+@echo off
+echo installing dependencies...
+npm install
+echo starting monetisation manager...
+npm run dev:full
+pause
