@@ -1,9 +1,7 @@
 # Roblox Monetisation Manager
-
 Free, open-source Roblox utility for managing gamepasses & developer products in bulk. Runs locally with your own Open Cloud API key — nothing leaves your machine.
 
 ## Features
-
 - Bulk create, edit, and manage gamepasses & developer products
 - Drag & drop icon uploads
 - Multi-select with bulk toggle for-sale / regional pricing
@@ -15,6 +13,11 @@ Free, open-source Roblox utility for managing gamepasses & developer products in
 
 Requires [Node.js](https://nodejs.org/) 18+. Unzip the project first!
 
+**Windows (easy way):**
+1. Run `install.bat` — installs dependencies (do this once)
+2. Run `start.bat` — starts the app
+
+**Manual:**
 ```bash
 cd path/to/monetisation-manager-main
 npm install
@@ -28,7 +31,6 @@ Open [http://localhost:5173](http://localhost:5173), enter your **API key** and 
 > - `universe.developer-product` — Read + Write
 
 ## Scripts
-
 | Command | Description |
 |---|---|
 | `npm run dev:full` | Frontend + proxy **(recommended)** |
@@ -37,7 +39,6 @@ Open [http://localhost:5173](http://localhost:5173), enter your **API key** and 
 | `npm start` | Production server |
 
 ## How It Works
-
 ```
 Browser → Vite (:5173) → Express proxy (:3001) → Roblox API
 ```
@@ -45,9 +46,7 @@ Browser → Vite (:5173) → Express proxy (:3001) → Roblox API
 The Express proxy avoids CORS. API keys stay in localStorage — nothing is sent to third parties.
 
 ## Tech Stack
-
 React 19, TypeScript, Vite, Tailwind, Radix UI, Express
 
 ## License
-
 [MIT](LICENSE)
