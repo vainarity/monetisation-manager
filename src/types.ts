@@ -38,6 +38,27 @@ export interface DeveloperProduct {
   iconUrl?: string;
 }
 
+export interface ImportableItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  isForSale: boolean;
+  isRegionalPricingEnabled: boolean;
+  iconUrl?: string;
+}
+
+export interface SubscriptionProduct {
+  id: string;
+  name: string;
+  description: string;
+  priceLabel: string;
+  billingPeriod: string;
+  state: "active" | "inactive" | "unknown";
+  iconUrl?: string;
+  priceKind?: "robux" | "local-currency" | "unknown";
+}
+
 export interface BulkCreateItem {
   name: string;
   description: string;

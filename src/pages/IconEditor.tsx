@@ -19,7 +19,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import type { AppState, GamePass, DeveloperProduct } from "../types";
-import { listGamePasses, listDeveloperProducts, updateGamePass, updateDeveloperProduct } from "../api/roblox";
+import { listGamePasses, listDeveloperProducts } from "../api/roblox";
 import { useToast } from "../components/ToastProvider";
 import { cn } from "@/lib/utils";
 

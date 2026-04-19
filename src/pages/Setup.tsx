@@ -147,7 +147,7 @@ export default function Setup({ appState, setAppState }: Props) {
             Roblox Util
           </h1>
           <p className="text-muted-foreground text-sm">
-            Bulk manage gamepasses and developer products for your Roblox experiences.
+            Bulk manage passes, developer products, and subscription workflows for your Roblox experiences.
           </p>
         </div>
 
@@ -312,16 +312,20 @@ export default function Setup({ appState, setAppState }: Props) {
                   onCheckedChange={(v) => setSaveKey(v === true)}
                 />
                 <Label htmlFor="save-key" className="text-xs text-muted-foreground cursor-pointer">
-                  Save this API key for later
+                  Keep this API key until you close the browser
                 </Label>
               </div>
               {saveKey && (
-                <Input
-                  value={keyLabel}
-                  onChange={(e) => setKeyLabel(e.target.value)}
-                  placeholder='e.g. "My Main Key"'
-                  className="mt-2"
-                />
+                <div className="mt-2 space-y-2">
+                  <Input
+                    value={keyLabel}
+                    onChange={(e) => setKeyLabel(e.target.value)}
+                    placeholder='e.g. "My Main Key"'
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Stored in session storage only. Older persistent key data is cleared automatically.
+                  </p>
+                </div>
               )}
             </div>
           )}

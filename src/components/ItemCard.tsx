@@ -208,7 +208,9 @@ export default function ItemCard({
             {priceDisplay}
           </div>
           {isRegionalPricingEnabled && (
-            <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0 ml-1" title="Regional pricing enabled" />
+            <span title="Regional pricing enabled">
+              <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0 ml-1" />
+            </span>
           )}
         </div>
       </Card>
@@ -259,7 +261,9 @@ export default function ItemCard({
       </div>
       <div className="flex items-center shrink-0">
         {isRegionalPricingEnabled && (
-          <Globe className="h-4 w-4 text-muted-foreground/50 mr-1" title="Regional pricing enabled" />
+          <span title="Regional pricing enabled">
+            <Globe className="h-4 w-4 text-muted-foreground/50 mr-1" />
+          </span>
         )}
         {iconUrl && onDeleteIcon && (
           <button

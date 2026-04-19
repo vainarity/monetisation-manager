@@ -1,5 +1,4 @@
 import express from "express";
-import cors from "cors";
 import path from "path";
 
 const app = express();
@@ -7,13 +6,60 @@ const PORT = process.env.PORT || 3001;
 const ROBLOX_API = "https://apis.roblox.com";
 const THUMBNAILS_API = "https://thumbnails.roblox.com";
 const GAMES_API = "https://games.roblox.com";
+const ALLOWED_ORIGINS = new Set([
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3001",
+  "http://127.0.0.1:3001",
+]);
+const ALLOWED_IMAGE_HOST_SUFFIXES = [".rbxcdn.com", ".roblox.com"];
 
-app.use(cors());
+function isAllowedOrigin(origin?: string): boolean {
+  return !origin || ALLOWED_ORIGINS.has(origin);
+}
+
+function isAllowedRobloxImageUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") return false;
+    return ALLOWED_IMAGE_HOST_SUFFIXES.some(
+      (suffix) => parsed.hostname === suffix.slice(1) || parsed.hostname.endsWith(suffix)
+    );
+  } catch {
+    return false;
+  }
+}
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!isAllowedOrigin(origin)) {
+    res.status(403).json({ error: "Origin not allowed" });
+    return;
+  }
+
+  if (origin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-api-key");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,HEAD,OPTIONS");
+  }
+
+  if (req.method === "OPTIONS") {
+    res.sendStatus(204);
+    return;
+  }
+
+  next();
+});
 
 // Proxy image fetches (to avoid CORS tainting canvas)
 app.get("/__image-proxy", async (req, res) => {
   const url = req.query.url as string;
   if (!url) { res.status(400).json({ error: "Missing url param" }); return; }
+  if (!isAllowedRobloxImageUrl(url)) {
+    res.status(400).json({ error: "Only Roblox-hosted HTTPS images are allowed" });
+    return;
+  }
   try {
     const response = await fetch(url);
     res.status(response.status);
@@ -80,7 +126,9 @@ app.all("/api/roblox/*path", async (req, res) => {
   req.on("end", async () => {
     const body = chunks.length > 0 ? Buffer.concat(chunks) : undefined;
 
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = {
+      accept: "application/json, */*",
+    };
     if (req.headers["x-api-key"]) {
       headers["x-api-key"] = req.headers["x-api-key"] as string;
     }

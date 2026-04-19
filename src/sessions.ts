@@ -1,12 +1,34 @@
 import type { Session, SavedKey } from "./types";
 
 const STORAGE_KEY = "roblox-manager-sessions";
+const KEYS_STORAGE_KEY = "roblox-manager-saved-keys";
+
+function readJson<T>(storage: Storage, key: string): T | null {
+  try {
+    const raw = storage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+function loadSensitiveEntries<T>(key: string): T[] {
+  const current = readJson<T[]>(sessionStorage, key);
+  if (current) return current;
+
+  const legacy = readJson<T[]>(localStorage, key);
+  if (legacy) {
+    sessionStorage.setItem(key, JSON.stringify(legacy));
+    localStorage.removeItem(key);
+    return legacy;
+  }
+
+  return [];
+}
 
 export function getSessions(): Session[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const sessions: Session[] = JSON.parse(raw);
+    const sessions = loadSensitiveEntries<Session>(STORAGE_KEY);
     return sessions.sort((a, b) => b.lastUsed - a.lastUsed);
   } catch {
     return [];
@@ -22,7 +44,7 @@ export function saveSession(session: Omit<Session, "id" | "lastUsed">): Session 
   if (existing) {
     existing.experienceName = session.experienceName;
     existing.lastUsed = Date.now();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
     return existing;
   }
 
@@ -32,24 +54,18 @@ export function saveSession(session: Omit<Session, "id" | "lastUsed">): Session 
     lastUsed: Date.now(),
   };
   sessions.push(newSession);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
   return newSession;
 }
 
 export function deleteSession(id: string): void {
   const sessions = getSessions().filter((s) => s.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
 }
-
-// --- Saved API Keys ---
-
-const KEYS_STORAGE_KEY = "roblox-manager-saved-keys";
 
 export function getSavedKeys(): SavedKey[] {
   try {
-    const raw = localStorage.getItem(KEYS_STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as SavedKey[];
+    return loadSensitiveEntries<SavedKey>(KEYS_STORAGE_KEY);
   } catch {
     return [];
   }
@@ -60,17 +76,17 @@ export function addSavedKey(label: string, apiKey: string): SavedKey {
   const existing = keys.find((k) => k.apiKey === apiKey);
   if (existing) {
     existing.label = label;
-    localStorage.setItem(KEYS_STORAGE_KEY, JSON.stringify(keys));
+    sessionStorage.setItem(KEYS_STORAGE_KEY, JSON.stringify(keys));
     return existing;
   }
 
   const newKey: SavedKey = { id: crypto.randomUUID(), label, apiKey };
   keys.push(newKey);
-  localStorage.setItem(KEYS_STORAGE_KEY, JSON.stringify(keys));
+  sessionStorage.setItem(KEYS_STORAGE_KEY, JSON.stringify(keys));
   return newKey;
 }
 
 export function deleteSavedKey(id: string): void {
   const keys = getSavedKeys().filter((k) => k.id !== id);
-  localStorage.setItem(KEYS_STORAGE_KEY, JSON.stringify(keys));
+  sessionStorage.setItem(KEYS_STORAGE_KEY, JSON.stringify(keys));
 }

@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Ticket, ShoppingCart, Gamepad2, Paintbrush, Calculator as CalcIcon, ChevronDown, Key, Globe } from "lucide-react";
+import { ArrowLeft, Ticket, ShoppingCart, Gamepad2, Paintbrush, Calculator as CalcIcon, ChevronDown, Key, Globe, Repeat } from "lucide-react";
 import type { AppState } from "../types";
 import { fetchUniverseInfo } from "../api/roblox";
 import { getSessions, saveSession } from "../sessions";
 import { Button } from "@/components/ui/button";
 import Gamepasses from "./Gamepasses";
 import DeveloperProducts from "./DeveloperProducts";
+import Subscriptions from "./Subscriptions";
 import IconEditor from "./IconEditor";
 import Calculator from "./Calculator";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { label: "Gamepasses", icon: Ticket, path: "/dashboard/gamepasses", requiresConfig: true },
   { label: "Dev Products", icon: ShoppingCart, path: "/dashboard/developer-products", requiresConfig: true },
+  { label: "Subscriptions", icon: Repeat, path: "/dashboard/subscriptions", requiresConfig: true },
   { label: "Icon Editor", icon: Paintbrush, path: "/dashboard/icon-editor", requiresConfig: false },
   { label: "Tax Calculator", icon: CalcIcon, path: "/dashboard/calculator", requiresConfig: false },
 ];
@@ -224,6 +226,10 @@ export default function Dashboard({ appState, onBack, setAppState }: Props) {
           <Route
             path="developer-products"
             element={isConfigured ? <DeveloperProducts appState={appState} /> : <NeedSetup onGoSetup={onBack} />}
+          />
+          <Route
+            path="subscriptions"
+            element={isConfigured ? <Subscriptions appState={appState} /> : <NeedSetup onGoSetup={onBack} />}
           />
           <Route
             path="icon-editor"

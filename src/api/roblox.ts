@@ -27,6 +27,31 @@ function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+function guessImageExtension(contentType: string | null): string {
+  if (!contentType) return "png";
+  if (contentType.includes("jpeg")) return "jpg";
+  if (contentType.includes("webp")) return "webp";
+  if (contentType.includes("bmp")) return "bmp";
+  return "png";
+}
+
+export async function fetchImageFileFromUrl(
+  imageUrl: string,
+  fileBaseName: string
+): Promise<File> {
+  const proxyUrl = `/__image-proxy?${new URLSearchParams({ url: imageUrl })}`;
+  const res = await fetch(proxyUrl);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch source image (${res.status})`);
+  }
+
+  const blob = await res.blob();
+  const extension = guessImageExtension(blob.type);
+  return new File([blob], `${fileBaseName}.${extension}`, {
+    type: blob.type || "image/png",
+  });
+}
+
 // ── Icon Cache ──────────────────────────────────────────────────────────
 
 const ICON_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
@@ -318,15 +343,17 @@ export async function createGamePass(
     name: string;
     description: string;
     price: number;
+    isForSale?: boolean;
     isRegionalPricingEnabled: boolean;
     imageFile: File | null;
   }
 ): Promise<{ id: string; name: string; price: number }> {
+  const isForSale = data.isForSale ?? true;
   const form = new FormData();
   form.append("name", data.name);
   form.append("description", data.description);
   form.append("price", String(data.price));
-  form.append("isForSale", "true");
+  form.append("isForSale", String(isForSale));
   form.append("isRegionalPricingEnabled", String(data.isRegionalPricingEnabled));
   if (data.imageFile) {
     form.append("file", data.imageFile, data.imageFile.name);
@@ -338,6 +365,9 @@ export async function createGamePass(
     { method: "POST", body: form }
   );
   const body: RawGamePass = await res.json();
+  if (!isForSale) {
+    await updateGamePass(apiKey, universeId, String(body.gamePassId), { isForSale: false });
+  }
   return {
     id: String(body.gamePassId),
     name: body.name,
@@ -446,15 +476,17 @@ export async function createDeveloperProduct(
     name: string;
     description: string;
     price: number;
+    isForSale?: boolean;
     isRegionalPricingEnabled: boolean;
     imageFile: File | null;
   }
 ): Promise<{ id: string; name: string; price: number }> {
+  const isForSale = data.isForSale ?? true;
   const form = new FormData();
   form.append("name", data.name);
   form.append("description", data.description);
   form.append("price", String(data.price));
-  form.append("isForSale", "true");
+  form.append("isForSale", String(isForSale));
   form.append("isRegionalPricingEnabled", String(data.isRegionalPricingEnabled));
   if (data.imageFile) {
     form.append("imageFile", data.imageFile);
@@ -466,6 +498,9 @@ export async function createDeveloperProduct(
     { method: "POST", body: form }
   );
   const body: RawDevProduct = await res.json();
+  if (!isForSale) {
+    await updateDeveloperProduct(apiKey, universeId, String(body.productId), { isForSale: false });
+  }
   return {
     id: String(body.productId),
     name: body.name,

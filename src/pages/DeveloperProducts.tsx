@@ -4,6 +4,7 @@ import {
   ExternalLink,
   RefreshCw,
   Copy,
+  Download,
   ArrowUp,
   ArrowDown,
   List,
@@ -29,6 +30,7 @@ import ItemCard from "../components/ItemCard";
 import EditDialog from "../components/EditDialog";
 import BulkCreateDialog from "../components/BulkCreateDialog";
 import ExportDialog from "../components/ExportDialog";
+import ImportFromUniverseDialog from "../components/ImportFromUniverseDialog";
 import { useToast } from "../components/ToastProvider";
 
 interface Props {
@@ -46,6 +48,7 @@ export default function DeveloperProducts({ appState }: Props) {
   const [editTarget, setEditTarget] = useState<DeveloperProduct | null>(null);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const [sortPrice, setSortPrice] = useState<"asc" | "desc" | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
@@ -230,6 +233,10 @@ export default function DeveloperProducts({ appState }: Props) {
         <Button size="sm" onClick={() => setBulkOpen(true)}>
           <Plus className="h-4 w-4 mr-1" />
           Bulk Create
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
+          <Download className="h-3.5 w-3.5 mr-1" />
+          Import Universe
         </Button>
         <Button variant="outline" size="sm" onClick={fetchProducts} disabled={loading}>
           <RefreshCw className={`h-3.5 w-3.5 mr-1 ${loading ? "animate-spin" : ""}`} />
@@ -416,6 +423,22 @@ export default function DeveloperProducts({ appState }: Props) {
         onCreate={handleBulkCreate}
         title="Bulk Create Developer Products"
         showDescription={false}
+      />
+
+      <ImportFromUniverseDialog
+        open={importOpen}
+        onClose={(created) => {
+          setImportOpen(false);
+          if (created) {
+            showToast("Developer products imported successfully");
+            fetchProducts();
+          }
+        }}
+        title="Import Developer Products From Another Universe"
+        emptyLabel="No developer products found in that source universe."
+        showDescription={false}
+        loadSourceItems={(sourceUniverseId) => listDeveloperProducts(apiKey, sourceUniverseId)}
+        onCreate={(item) => createDeveloperProduct(apiKey, universeId, item)}
       />
 
       <ExportDialog
